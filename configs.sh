@@ -1,0 +1,2 @@
+
+export IMAGE_MAGICK_VERSION="6.8.1-10"

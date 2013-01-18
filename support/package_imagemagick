@@ -1,0 +1,41 @@
+#!/bin/sh
+
+set -e
+
+source `dirname $0`/../configs.sh
+
+if [ "$AWS_ID" == "" ]; then
+  echo "must set AWS_ID"
+  exit 1
+fi
+
+if [ "$AWS_SECRET" == "" ]; then
+  echo "must set AWS_SECRET"
+  exit 1
+fi
+
+if [ "$S3_BUCKET" == "" ]; then
+  echo "must set S3_BUCKET"
+  exit 1
+fi
+
+basedir="$( cd -P "$( dirname "$0" )" && pwd )"
+
+# make a temp directory
+tempdir="$( mktemp -t imagemagick_XXXX )"
+rm -rf $tempdir
+mkdir -p $tempdir
+cd $tempdir
+
+echo "http://www.imagemagick.org/download/ImageMagick-${IMAGE_MAGICK_VERSION}.tar.gz"
+
+# build and package imagemagick for heroku
+vulcan build -v \
+  -s "http://www.imagemagick.org/download/ImageMagick-${IMAGE_MAGICK_VERSION}.tar.gz" \
+  -n imagemagick \
+  -c "cd ImageMagick-${IMAGE_MAGICK_VERSION} && ./configure --prefix=/app/vendor/imagemagick && make install" \
+  -o $tempdir/imagemagick-${IMAGE_MAGICK_VERSION}.tgz
+
+# upload imagemagick to s3
+$basedir/aws/s3 put $S3_BUCKET \
+  imagemagick-${IMAGE_MAGICK_VERSION}.tgz $tempdir/imagemagick-${IMAGE_MAGICK_VERSION}.tgz

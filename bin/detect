@@ -1,0 +1,4 @@
+#! /bin/bash
+
+# this buildpack can always be used
+exit 0

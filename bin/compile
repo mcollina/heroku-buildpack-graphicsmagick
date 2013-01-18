@@ -1,0 +1,15 @@
+#! /bin/bash
+
+set -e
+
+source `dirname $0`/../configs.sh
+
+indent() {
+  sed -u 's/^/       /'
+}
+
+arrow() {
+  sed -u 's/^/-----> /'
+}
+
+echo "Installing imagemagick $IMAGE_MAGICK_VERSION in bin/" | arrow
