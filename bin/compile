@@ -50,3 +50,4 @@ cp $VENDORED_IMAGEMAGICK/bin/* "$BUILD_DIR/bin/"
 echo "Building runtime environment for imagemagick" | arrow
 mkdir -p $BUILD_DIR/.profile.d
 echo "export PATH=\"\$HOME/bin:\$PATH\"" > $BUILD_DIR/.profile.d/imagemagick.sh
+echo "export LD_RUN_PATH=\"$VENDORED_IMAGEMAGICK/lib:\$LD_RUN_PATH\"" > $BUILD_DIR/.profile.d/imagemagick.sh
