@@ -17,6 +17,13 @@ arrow() {
   sed -u 's/^/-----> /'
 }
 
+function mktmpdir() {
+  dir=$(mktemp -t imagemagick-$1-XXXX)
+  rm -rf $dir
+  mkdir -p $dir
+  echo $dir
+}
+
 function package_download() {
   local remote location
   remote="$1"
