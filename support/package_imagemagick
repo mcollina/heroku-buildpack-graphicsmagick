@@ -27,15 +27,17 @@ rm -rf $tempdir
 mkdir -p $tempdir
 cd $tempdir
 
-echo "http://www.imagemagick.org/download/ImageMagick-${IMAGE_MAGICK_VERSION}.tar.gz"
+local_path=$tempdir/imagemagick-${IMAGE_MAGICK_VERSION}.tgz
 
 # build and package imagemagick for heroku
 vulcan build -v \
   -s "http://www.imagemagick.org/download/ImageMagick-${IMAGE_MAGICK_VERSION}.tar.gz" \
   -n imagemagick \
   -c "cd ImageMagick-${IMAGE_MAGICK_VERSION} && ./configure --prefix=/app/vendor/imagemagick && make install" \
-  -o $tempdir/imagemagick-${IMAGE_MAGICK_VERSION}.tgz
+  -o $local_path
 
-# upload imagemagick to s3
-$basedir/aws/s3 put $S3_BUCKET \
-  imagemagick-${IMAGE_MAGICK_VERSION}.tgz $tempdir/imagemagick-${IMAGE_MAGICK_VERSION}.tgz
+echo ">>> Uploading build artifacts"
+echo "    to ${S3_BUCKET}/${REMOTE_PATH}"
+echo "    from ${local_path}"
+
+$basedir/aws/s3 put $S3_BUCKET $REMOTE_PATH $local_path

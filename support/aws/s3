@@ -3,6 +3,9 @@
 # Licensed under the terms of the GNU GPL v2
 # Copyright 2007 Victor Lowther <victor.lowther@gmail.com>
 
+# Set the lang to C, otherwise the 'date' command will not generate
+# correct dates for other languages
+LANG=C
 set -e
 
 basedir="$( cd -P "$( dirname "$0" )" && pwd )"
