@@ -4,6 +4,11 @@ set -e
 
 source `dirname $0`/../configs.sh
 
+# parse and derive params
+BUILD_DIR=$1
+CACHE_DIR=$2
+LP_DIR=`cd $(dirname $0); cd ..; pwd`
+
 indent() {
   sed -u 's/^/       /'
 }
@@ -12,4 +17,28 @@ arrow() {
   sed -u 's/^/-----> /'
 }
 
+function package_download() {
+  local remote location
+  remote="$1"
+  location="$2"
+
+  mkdir -p $location
+  package="http://s3.amazonaws.com/${S3_BUCKET}/${remote}"
+  curl $package -s -o - | tar xzf - -C $location
+}
+
+echo "Downloading imagemagick $IMAGE_MAGICK_VERSION" | arrow
+
+# vendor directories
+VENDORED_IMAGEMAGICK="$(mktmpdir imagemagick)"
+package_download "${REMOTE_PATH}" "${VENDORED_IMAGEMAGICK}"
+
+echo "Download completed" | indent
+
 echo "Installing imagemagick $IMAGE_MAGICK_VERSION in bin/" | arrow
+
+cp "$VENDORED_IMAGEMAGICK/bin/*" "$VENDORED_IMAGEMAGICK/bin/"
+
+echo "Building runtime environment for imagemagick" | arrow
+mkdir -p $BUILD_DIR/.profile.d
+echo "export PATH=\"\$HOME/bin:\$PATH\"" > $BUILD_DIR/.profile.d/imagemagick.sh
