@@ -49,6 +49,7 @@ cp $VENDORED_IMAGEMAGICK/bin/* "$BUILD_DIR/bin/"
 
 lib_path=$BUILD_DIR/vendor/imagemagick/lib/
 mkdir -p lib_path
+ls -R $BUILD_DIR
 cp $VENDORED_IMAGEMAGICK/lib/* $lib_path
 
 echo "Building runtime environment for imagemagick" | arrow
