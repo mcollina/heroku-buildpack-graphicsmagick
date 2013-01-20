@@ -44,7 +44,8 @@ echo "Download completed" | indent
 
 echo "Installing imagemagick $IMAGE_MAGICK_VERSION in bin/" | arrow
 
-cp $VENDORED_IMAGEMAGICK/bin/* "$VENDORED_IMAGEMAGICK/bin/"
+mkdir -p "$BUILD_DIR/bin/"
+cp $VENDORED_IMAGEMAGICK/bin/* "$BUILD_DIR/bin/"
 
 echo "Building runtime environment for imagemagick" | arrow
 mkdir -p $BUILD_DIR/.profile.d
