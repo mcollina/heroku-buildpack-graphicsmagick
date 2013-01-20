@@ -47,7 +47,7 @@ echo "Installing imagemagick $IMAGE_MAGICK_VERSION" | arrow
 mkdir -p "$BUILD_DIR/bin/"
 cp $VENDORED_IMAGEMAGICK/bin/* "$BUILD_DIR/bin/"
 
-lib_path=$BUILD_DIR/vendor/imagemagick/lib
+lib_path=$BUILD_DIR/vendor/imagemagick/lib/
 mkdir -p lib_path
 cp $VENDORED_IMAGEMAGICK/lib/* $lib_path
 
