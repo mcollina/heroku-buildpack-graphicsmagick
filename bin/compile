@@ -42,12 +42,16 @@ package_download "${REMOTE_PATH}" "${VENDORED_IMAGEMAGICK}"
 
 echo "Download completed" | indent
 
-echo "Installing imagemagick $IMAGE_MAGICK_VERSION in bin/" | arrow
+echo "Installing imagemagick $IMAGE_MAGICK_VERSION" | arrow
 
 mkdir -p "$BUILD_DIR/bin/"
 cp $VENDORED_IMAGEMAGICK/bin/* "$BUILD_DIR/bin/"
 
+lib_path=$BUILD_DIR/vendor/imagemagick/lib
+mkdir -p lib_path
+cp $VENDORED_IMAGEMAGICK/lib/* $lib_path
+
 echo "Building runtime environment for imagemagick" | arrow
 mkdir -p $BUILD_DIR/.profile.d
 echo "export PATH=\"\$HOME/bin:\$PATH\"" > $BUILD_DIR/.profile.d/imagemagick.sh
-echo "export LD_RUN_PATH=\"$VENDORED_IMAGEMAGICK/lib:\$LD_RUN_PATH\"" > $BUILD_DIR/.profile.d/imagemagick.sh
+echo "export LD_RUN_PATH=\"$lib_path:\$LD_RUN_PATH\"" > $BUILD_DIR/.profile.d/imagemagick.sh
