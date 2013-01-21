@@ -36,15 +36,14 @@ The bucket name and imagemagick version are stored in the configs.sh file,
 so update it there (if you plan to contribute back to this repo, do this 
 in a separate commit).
 
-For example, you can change the default version of Node.js to v0.6.7.
-
-First you'll need to build a Heroku-compatible version of Node.js:
+To rebuild the ImageMagick package, you can:
 
     $ export AWS_ID=xxx AWS_SECRET=yyy
     $ s3 create $S3_BUCKET
     $ support/package_imagemagick
 
-Commit and push the changes to your buildpack to your Github fork, then push your sample app to Heroku to test.  You should see:
+Commit and push the changes to your buildpack to your Github fork, then
+push your sample app to Heroku to test.  You should see:
 
     -----> Downloading imagemagick YOUR_IMAGE_MAGICK_VERSION_HERE
 
