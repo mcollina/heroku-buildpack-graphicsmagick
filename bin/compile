@@ -46,7 +46,7 @@ package_download "${REMOTE_PATH}" "${VENDORED_LIBPNG}"
 
 echo "Download completed" | indent
 
-cp -R $VENDORED_IMAGEMAGICK/lib/* $lib_path
+cp -R $VENDORED_LIBPNG/lib/* $lib_path
 
 echo "Installation completed" | indent
 
