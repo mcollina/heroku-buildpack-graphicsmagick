@@ -27,17 +27,45 @@ rm -rf $tempdir
 mkdir -p $tempdir
 cd $tempdir
 
-local_path=$tempdir/imagemagick-${IMAGE_MAGICK_VERSION}.tgz
+im_local_path=$tempdir/imagemagick-${IMAGE_MAGICK_VERSION}.tgz
+
+libpng_local_path=$tempdir/libpng-${LIBPNG_VERSION}.tgz
+
+echo ">>> Downloading libpng sources"
+
+libpng_sources=$tempdir/libpng-${LIBPNG_VERSION}.tar.gz
+curl ftp://ftp.simplesystems.org/pub/libpng/png/src/libpng-${LIBPNG_VERSION}.tar.gz > $libpng_sources
+
+tar -C $tempdir -x -z -f $libpng_sources
+
+echo ">>> Building libpng"
+
+# build and package libpng for heroku
+vulcan build -v \
+  -s $tempdir/libpng-${LIBPNG_VERSION} \
+  -n libpng\
+  -o $libpng_local_path
+
+# -c "cd libpng-${LIBPNG_VERSION} && ./configure --prefix=/app/vendor/libpng && make install" \
+
+echo ">>> Uploading libpng artifact"
+echo "    to ${S3_BUCKET}/${LIBPNG_REMOTE_PATH}"
+echo "    from ${libpng_local_path}"
+
+$basedir/aws/s3 put $S3_BUCKET $LIBPNG_REMOTE_PATH $libpng_local_path
+
+echo ">>> Building imagemagick"
 
 # build and package imagemagick for heroku
 vulcan build -v \
   -s "http://www.imagemagick.org/download/ImageMagick-${IMAGE_MAGICK_VERSION}.tar.gz" \
   -n imagemagick \
   -c "cd ImageMagick-${IMAGE_MAGICK_VERSION} && ./configure --prefix=/app/vendor/imagemagick && make install" \
-  -o $local_path
+  -o $im_local_path \
+  --deps $LIBPNG_REMOTE_PATH
 
-echo ">>> Uploading build artifacts"
+echo ">>> Uploading image magick artifact"
 echo "    to ${S3_BUCKET}/${REMOTE_PATH}"
-echo "    from ${local_path}"
+echo "    from ${im_local_path}"
 
-$basedir/aws/s3 put $S3_BUCKET $REMOTE_PATH $local_path
+$basedir/aws/s3 put $S3_BUCKET $REMOTE_PATH $im_local_path

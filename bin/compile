@@ -34,7 +34,23 @@ function package_download() {
   curl $package -s -o - | tar xzf - -C $location
 }
 
-echo "Downloading imagemagick $IMAGE_MAGICK_VERSION" | arrow
+# we need this directory, it's our destination
+lib_path=$BUILD_DIR/vendor/imagemagick/lib/
+mkdir -p $lib_path
+
+echo "Installing libpng $LIBPNG_VERSION" | arrow
+
+# vendor directories
+VENDORED_LIBPNG="$(mktmpdir libpng)"
+package_download "${REMOTE_PATH}" "${VENDORED_LIBPNG}"
+
+echo "Download completed" | indent
+
+cp -R $VENDORED_IMAGEMAGICK/lib/* $lib_path
+
+echo "Installation completed" | indent
+
+echo "Installing imagemagick $IMAGE_MAGICK_VERSION" | arrow
 
 # vendor directories
 VENDORED_IMAGEMAGICK="$(mktmpdir imagemagick)"
@@ -42,14 +58,12 @@ package_download "${REMOTE_PATH}" "${VENDORED_IMAGEMAGICK}"
 
 echo "Download completed" | indent
 
-echo "Installing imagemagick $IMAGE_MAGICK_VERSION" | arrow
-
 mkdir -p "$BUILD_DIR/bin/"
 cp $VENDORED_IMAGEMAGICK/bin/* "$BUILD_DIR/bin/"
 
-lib_path=$BUILD_DIR/vendor/imagemagick/lib/
-mkdir -p $lib_path
 cp -R $VENDORED_IMAGEMAGICK/lib/* $lib_path
+
+echo "Installation completed" | indent
 
 echo "Building runtime environment for imagemagick" | arrow
 mkdir -p $BUILD_DIR/.profile.d
