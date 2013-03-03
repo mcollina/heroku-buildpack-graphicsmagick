@@ -1,6 +1,6 @@
 
 export LIBPNG_VERSION="1.5.14"
-export IMAGE_MAGICK_VERSION="6.8.2-3"
-export REMOTE_PATH="imagemagick-${IMAGE_MAGICK_VERSION}.tgz"
+export GRAPHICS_MAGICK_VERSION="1.3.17"
+export REMOTE_PATH="graphicsmagick-${GRAPHICS_MAGICK_VERSION}.tgz"
 export LIBPNG_REMOTE_PATH="libpng-${LIBPNG_VERSION}.tgz"
-export S3_BUCKET="buildpack-imagemagick"
+export S3_BUCKET="heroku-buildpack-graphicsmagick"

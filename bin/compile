@@ -18,7 +18,7 @@ arrow() {
 }
 
 function mktmpdir() {
-  dir=$(mktemp -t imagemagick-$1-XXXX)
+  dir=$(mktemp -t graphicsmagick-$1-XXXX)
   rm -rf $dir
   mkdir -p $dir
   echo $dir
@@ -35,7 +35,7 @@ function package_download() {
 }
 
 # we need this directory, it's our destination
-lib_path=$BUILD_DIR/vendor/imagemagick/lib/
+lib_path=$BUILD_DIR/vendor/graphicsmagick/lib/
 mkdir -p $lib_path
 
 echo "Installing libpng $LIBPNG_VERSION" | arrow
@@ -50,22 +50,22 @@ cp -R $VENDORED_LIBPNG/lib/* $lib_path
 
 echo "Installation completed" | indent
 
-echo "Installing imagemagick $IMAGE_MAGICK_VERSION" | arrow
+echo "Installing graphicsmagick $GRAPHICS_MAGICK_VERSION" | arrow
 
 # vendor directories
-VENDORED_IMAGEMAGICK="$(mktmpdir imagemagick)"
-package_download "${REMOTE_PATH}" "${VENDORED_IMAGEMAGICK}"
+VENDORED_GRAPHICSMAGICK="$(mktmpdir graphicsmagick)"
+package_download "${REMOTE_PATH}" "${VENDORED_GRAPHICSMAGICK}"
 
 echo "Download completed" | indent
 
 mkdir -p "$BUILD_DIR/bin/"
-cp $VENDORED_IMAGEMAGICK/bin/* "$BUILD_DIR/bin/"
+cp $VENDORED_GRAPHICSMAGICK/bin/* "$BUILD_DIR/bin/"
 
-cp -R $VENDORED_IMAGEMAGICK/lib/* $lib_path
+cp -R $VENDORED_GRAPHICSMAGICK/lib/* $lib_path
 
 echo "Installation completed" | indent
 
-echo "Building runtime environment for imagemagick" | arrow
+echo "Building runtime environment for graphicsmagick" | arrow
 mkdir -p $BUILD_DIR/.profile.d
-echo "export PATH=\"\$HOME/bin:\$PATH\"" > $BUILD_DIR/.profile.d/imagemagick.sh
-echo "export LD_RUN_PATH=\"$lib_path:\$LD_RUN_PATH\"" > $BUILD_DIR/.profile.d/imagemagick.sh
+echo "export PATH=\"\$HOME/bin:\$PATH\"" > $BUILD_DIR/.profile.d/graphicsmagick.sh
+echo "export LD_RUN_PATH=\"$lib_path:\$LD_RUN_PATH\"" > $BUILD_DIR/.profile.d/graphicsmagick.sh
