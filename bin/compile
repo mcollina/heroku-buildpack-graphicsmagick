@@ -35,7 +35,7 @@ function package_download() {
 }
 
 # we need this directory, it's our destination
-libpng_lib_path=/app/vendor/libpng
+libpng_lib_path=$BUILD_DIR/vendor/libpng
 mkdir -p $libpng_lib_path
 
 echo "Installing libpng $LIBPNG_VERSION" | arrow
@@ -52,7 +52,7 @@ echo "Installation completed" | indent
 
 
 # we need this directory, it's our destination
-gm_lib_path=/app/vendor/graphicsmagick
+gm_lib_path=$BUILD_DIR/vendor/graphicsmagick
 mkdir -p $gm_lib_path
 
 echo "Installing graphicsmagick $GRAPHICS_MAGICK_VERSION" | arrow
@@ -73,4 +73,4 @@ echo "Installation completed" | indent
 echo "Building runtime environment for graphicsmagick" | arrow
 mkdir -p $BUILD_DIR/.profile.d
 echo "export PATH=\"\$HOME/bin:\$PATH\"" > $BUILD_DIR/.profile.d/graphicsmagick.sh
-echo "export LD_LIBRARY_PATH=\"$libpng_lib_path/lib/:$gm_lib_path/lib/:\$LD_LIBRARY_PATH\"" > $BUILD_DIR/.profile.d/graphicsmagick.sh
+echo "export LD_LIBRARY_PATH=\"/app/vendor/libpng/lib/:/app/vendor/graphicsmagick/lib/:\$LD_LIBRARY_PATH\"" > $BUILD_DIR/.profile.d/graphicsmagick.sh
