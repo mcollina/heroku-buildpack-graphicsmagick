@@ -66,7 +66,7 @@ vulcan build -v \
   -s $tempdir/GraphicsMagick-$GRAPHICS_MAGICK_VERSION \
   -n graphicsmagick \
   -o $gm_local_path \
-  --deps $LIBPNG_REMOTE_PATH
+  --deps http://s3.amazonaws.com/$S3_BUCKET/$LIBPNG_REMOTE_PATH
 
 echo ">>> Uploading graphics magick artifact"
 echo "    to ${S3_BUCKET}/${REMOTE_PATH}"
