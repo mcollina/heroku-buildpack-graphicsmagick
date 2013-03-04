@@ -73,5 +73,4 @@ echo "Installation completed" | indent
 echo "Building runtime environment for graphicsmagick" | arrow
 mkdir -p $BUILD_DIR/.profile.d
 echo "export PATH=\"\$HOME/bin:\$PATH\"" > $BUILD_DIR/.profile.d/graphicsmagick.sh
-echo "export LD_RUN_PATH=\"$libpng_lib_path:$gm_lib_path:\$LD_RUN_PATH\"" > $BUILD_DIR/.profile.d/graphicsmagick.sh
-echo "export LD_LIBRARY_PATH=\"$libpng_lib_path:$gm_lib_path:\$LD_LIBRARY_PATH\"" > $BUILD_DIR/.profile.d/graphicsmagick.sh
+echo "export LD_LIBRARY_PATH=\"$libpng_lib_path/lib/:$gm_lib_path/lib/:\$LD_LIBRARY_PATH\"" > $BUILD_DIR/.profile.d/graphicsmagick.sh
