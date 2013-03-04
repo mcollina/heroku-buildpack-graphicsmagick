@@ -42,7 +42,7 @@ echo "Installing libpng $LIBPNG_VERSION" | arrow
 
 # vendor directories
 VENDORED_LIBPNG="$(mktmpdir libpng)"
-package_download "${REMOTE_PATH}" "${VENDORED_LIBPNG}"
+package_download "${LIBPNG_REMOTE_PATH}" "${VENDORED_LIBPNG}"
 
 echo "Download completed" | indent
 
