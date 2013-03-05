@@ -26,12 +26,27 @@ rm -rf $tempdir
 mkdir -p $tempdir
 cd $tempdir
 
-gm_local_path=$tempdir/graphcismagick-${GRAPHICS_MAGICK_VERSION}.tgz
+echo ">>> Downloading zlib sources"
 
-libpng_local_path=$tempdir/libpng-${LIBPNG_VERSION}.tgz
+zlib_local_path=$tempdir/zlib-${ZLIB_VERSION}.tgz
+zlib_sources=$tempdir/zlib-${ZLIB_VERSION}.tar.gz
+curl http://zlib.net/zlib-${ZLIB_VERSION}.tar.gz > $zlib_sources
+
+tar -C $tempdir -x -z -f $zlib_sources
+
+echo ">>> Building zlib"
+
+# build and package zlib for heroku
+vulcan build -v \
+  -s $tempdir/zlib-${ZLIB_VERSION} \
+  -n zlib\
+  -o $zlib_local_path
+
+$basedir/aws/s3 put $S3_BUCKET $ZLIB_REMOTE_PATH $zlib_local_path
 
 echo ">>> Downloading libpng sources"
 
+libpng_local_path=$tempdir/libpng-${LIBPNG_VERSION}.tgz
 libpng_sources=$tempdir/libpng-${LIBPNG_VERSION}.tar.gz
 curl ftp://ftp.simplesystems.org/pub/libpng/png/src/libpng15/libpng-${LIBPNG_VERSION}.tar.gz > $libpng_sources
 
@@ -43,7 +58,8 @@ echo ">>> Building libpng"
 vulcan build -v \
   -s $tempdir/libpng-${LIBPNG_VERSION} \
   -n libpng\
-  -o $libpng_local_path
+  -o $libpng_local_path \
+  --deps http://s3.amazonaws.com/$S3_BUCKET/$ZLIB_REMOTE_PATH
 
 echo ">>> Uploading libpng artifact"
 echo "    to ${S3_BUCKET}/${LIBPNG_REMOTE_PATH}"
@@ -53,6 +69,7 @@ $basedir/aws/s3 put $S3_BUCKET $LIBPNG_REMOTE_PATH $libpng_local_path
 
 echo ">>> Downloading graphicsmagick"
 
+gm_local_path=$tempdir/graphcismagick-${GRAPHICS_MAGICK_VERSION}.tgz
 gm_sources=$tempdir/graphicsmagick-${LIBPNG_VERSION}.tar.gz
 #curl ftp://ftp.graphicsmagick.org/pub/GraphicsMagick/1.3/GraphicsMagick-${GRAPHICS_MAGICK_VERSION}.tar.gz > $gm_sources
 curl http://78.108.103.11/MIRROR/ftp/GraphicsMagick/1.3/GraphicsMagick-${GRAPHICS_MAGICK_VERSION}.tar.gz > $gm_sources
@@ -66,7 +83,8 @@ vulcan build -v \
   -s $tempdir/GraphicsMagick-$GRAPHICS_MAGICK_VERSION \
   -n graphicsmagick \
   -o $gm_local_path \
-  --deps http://s3.amazonaws.com/$S3_BUCKET/$LIBPNG_REMOTE_PATH
+  --deps http://s3.amazonaws.com/$S3_BUCKET/$LIBPNG_REMOTE_PATH \
+  http://s3.amazonaws.com/$S3_BUCKET/$ZLIB_REMOTE_PATH
 
 echo ">>> Uploading graphics magick artifact"
 echo "    to ${S3_BUCKET}/${REMOTE_PATH}"

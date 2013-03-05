@@ -34,34 +34,43 @@ function package_download() {
   curl $package -s -o - | tar xzf - -C $location
 }
 
+echo "Installing zlib $ZLIB_VERSION" | arrow
+
+# we need this directory, it's our destination
+zlib_lib_path=$BUILD_DIR/vendor/zlib
+mkdir -p $zlib_lib_path
+
+# vendor directories
+VENDORED_ZLIB="$(mktmpdir libpng)"
+package_download "${ZLIB_REMOTE_PATH}" "${VENDORED_ZLIB}"
+
+cp -R $VENDORED_ZLIB/* $zlib_lib_path
+
+echo "Installation completed" | indent
+
+echo "Installing libpng $LIBPNG_VERSION" | arrow
+
 # we need this directory, it's our destination
 libpng_lib_path=$BUILD_DIR/vendor/libpng
 mkdir -p $libpng_lib_path
-
-echo "Installing libpng $LIBPNG_VERSION" | arrow
 
 # vendor directories
 VENDORED_LIBPNG="$(mktmpdir libpng)"
 package_download "${LIBPNG_REMOTE_PATH}" "${VENDORED_LIBPNG}"
 
-echo "Download completed" | indent
-
 cp -R $VENDORED_LIBPNG/* $libpng_lib_path
 
 echo "Installation completed" | indent
 
+echo "Installing graphicsmagick $GRAPHICS_MAGICK_VERSION" | arrow
 
 # we need this directory, it's our destination
 gm_lib_path=$BUILD_DIR/vendor/graphicsmagick
 mkdir -p $gm_lib_path
 
-echo "Installing graphicsmagick $GRAPHICS_MAGICK_VERSION" | arrow
-
 # vendor directories
 VENDORED_GRAPHICSMAGICK="$(mktmpdir graphicsmagick)"
 package_download "${REMOTE_PATH}" "${VENDORED_GRAPHICSMAGICK}"
-
-echo "Download completed" | indent
 
 mkdir -p "$BUILD_DIR/bin/"
 cp $VENDORED_GRAPHICSMAGICK/bin/* "$BUILD_DIR/bin/"
@@ -73,4 +82,4 @@ echo "Installation completed" | indent
 echo "Building runtime environment for graphicsmagick" | arrow
 mkdir -p $BUILD_DIR/.profile.d
 echo "export PATH=\"\$HOME/bin:\$PATH\"" > $BUILD_DIR/.profile.d/graphicsmagick.sh
-echo "export LD_LIBRARY_PATH=\"/app/vendor/libpng/lib/:/app/vendor/graphicsmagick/lib/:\$LD_LIBRARY_PATH\"" > $BUILD_DIR/.profile.d/graphicsmagick.sh
+echo "export LD_LIBRARY_PATH=\"/app/vendor/zlib/lib/:/app/vendor/libpng/lib/:/app/vendor/graphicsmagick/lib/:\$LD_LIBRARY_PATH\"" > $BUILD_DIR/.profile.d/graphicsmagick.sh
