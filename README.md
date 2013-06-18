@@ -1,8 +1,8 @@
 heroku-buildpack-imagemagick
 ===========================
 
-Use the latest version of ImageMagick inside Heroku _Cedar_.
-At the moment it is bundled the version 6.8.1-10.
+Use the latest version of GraphicsMagick inside Heroku _Cedar_.
+At the moment it is bundled the version 1.3.18.
 
 ## Usage
 
@@ -15,7 +15,7 @@ heroku config:set BUILDPACK_URL=https://github.com/ddollar/heroku-buildpack-mult
 
 Then, create a `.buildpacks` file inside your app:
 ```
-https://github.com/mcollina/heroku-buildpack-imagemagick
+https://github.com/mcollina/heroku-buildpack-graphicsmagick
 https://github.com/heroku/heroku-buildpack-nodejs
 ```
 
@@ -40,14 +40,14 @@ To rebuild the ImageMagick package, you can:
 
     $ export AWS_ID=xxx AWS_SECRET=yyy
     $ s3 create $S3_BUCKET
-    $ support/package_imagemagick
+    $ support/package_graphicsmagick
 
 Commit and push the changes to your buildpack to your Github fork, then
 push your sample app to Heroku to test.  You should see:
 
-    -----> Downloading imagemagick YOUR_IMAGE_MAGICK_VERSION_HERE
+    -----> Downloading graphicsmagick YOUR_IMAGE_MAGICK_VERSION_HERE
 
-## Contributing to heroku-buildpack-imagemagick
+## Contributing to heroku-buildpack-graphicsmagick
 
 * Check out the latest master to make sure the feature hasn't been
   implemented or the bug hasn't been fixed yet
@@ -56,10 +56,6 @@ push your sample app to Heroku to test.  You should see:
 * Fork the project
 * Start a feature/bugfix branch
 * Commit and push until you are happy with your contribution
-* Please try not to mess with the configs.sh. If you
-  want to have your own version, or is otherwise necessary, that is
-  fine, but please isolate to its own commit so I can cherry-pick around
-  it.
 
 ## LICENSE - "MIT License"
 
