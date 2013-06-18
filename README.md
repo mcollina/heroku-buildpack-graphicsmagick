@@ -1,4 +1,4 @@
-heroku-buildpack-imagemagick
+heroku-buildpack-graphicsmagick
 ===========================
 
 Use the latest version of GraphicsMagick inside Heroku _Cedar_.
