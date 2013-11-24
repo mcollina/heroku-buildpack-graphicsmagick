@@ -1,7 +1,11 @@
-#!/bin/sh 
+#! /bin/bash 
 set -e
 
 source `dirname $0`/../configs.sh
+
+pushd `dirname $0`/.. >> /dev/null
+home=`pwd`
+popd >> /dev/null
 
 if [ "$AWS_ID" == "" ]; then
   echo "must set AWS_ID"
@@ -26,37 +30,27 @@ rm -rf $tempdir
 mkdir -p $tempdir
 cd $tempdir
 
-echo ">>> Downloading zlib sources"
+echo ">>> Building zlib"
 
 zlib_local_path=$tempdir/zlib-${ZLIB_VERSION}.tgz
-zlib_sources=$tempdir/zlib-${ZLIB_VERSION}.tar.gz
-curl http://zlib.net/zlib-${ZLIB_VERSION}.tar.gz > $zlib_sources
-
-tar -C $tempdir -x -z -f $zlib_sources
-
-echo ">>> Building zlib"
 
 # build and package zlib for heroku
 vulcan build -v \
-  -s $tempdir/zlib-${ZLIB_VERSION} \
+  -s $home/vendor/zlib-${ZLIB_VERSION} \
   -n zlib\
   -o $zlib_local_path
 
+echo ">>> Uploading zlib"
+
 $basedir/aws/s3 put $S3_BUCKET $ZLIB_REMOTE_PATH $zlib_local_path
-
-echo ">>> Downloading libpng sources"
-
-libpng_local_path=$tempdir/libpng-${LIBPNG_VERSION}.tgz
-libpng_sources=$tempdir/libpng-${LIBPNG_VERSION}.tar.gz
-curl ftp://ftp.simplesystems.org/pub/libpng/png/src/libpng15/libpng-${LIBPNG_VERSION}.tar.gz > $libpng_sources
-
-tar -C $tempdir -x -z -f $libpng_sources
 
 echo ">>> Building libpng"
 
+libpng_local_path=$tempdir/libpng-${LIBPNG_VERSION}.tgz
+
 # build and package libpng for heroku
 vulcan build -v \
-  -s $tempdir/libpng-${LIBPNG_VERSION} \
+  -s $home/vendor/libpng-${LIBPNG_VERSION} \
   -n libpng\
   -o $libpng_local_path \
   --deps http://s3.amazonaws.com/$S3_BUCKET/$ZLIB_REMOTE_PATH
@@ -66,6 +60,38 @@ echo "    to ${S3_BUCKET}/${LIBPNG_REMOTE_PATH}"
 echo "    from ${libpng_local_path}"
 
 $basedir/aws/s3 put $S3_BUCKET $LIBPNG_REMOTE_PATH $libpng_local_path
+
+echo ">>> Building nasm"
+
+nasm_local_path=$tempdir/nasm-${NASM_VERSION}.tgz
+# build and package nasm for heroku
+vulcan build -v \
+  -s $home/vendor/nasm-${NASM_VERSION} \
+  -n nasm\
+  -o $nasm_local_path
+
+echo ">>> Uploading nasm artifact"
+echo "    to ${S3_BUCKET}/${NASM_REMOTE_PATH}"
+echo "    from ${nasm_local_path}"
+
+$basedir/aws/s3 put $S3_BUCKET $NASM_REMOTE_PATH $nasm_local_path
+
+echo ">>> Building libjpeg-turbo"
+
+libjpeg_turbo_local_path=$tempdir/libjpeg_turbo-${LIBJPEG_TURBO_VERSION}.tgz
+# build and package libpng for heroku
+vulcan build -v \
+  -s $home/vendor/libjpeg-turbo-${LIBJPEG_TURBO_VERSION} \
+  -n libjpeg_turbo\
+  -o $libjpeg_turbo_local_path \
+  --deps http://s3.amazonaws.com/$S3_BUCKET/$ZLIB_REMOTE_PATH \
+  http://s3.amazonaws.com/$S3_BUCKET/$NASM_REMOTE_PATH \
+
+echo ">>> Uploading libjpeg-turbo artifact"
+echo "    to ${S3_BUCKET}/${LIBJPEG_TURBO_REMOTE_PATH}"
+echo "    from ${libjpeg_turbo_local_path}"
+
+$basedir/aws/s3 put $S3_BUCKET $LIBJPEG_TURBO_REMOTE_PATH $libjpeg_turbo_local_path
 
 echo ">>> Downloading graphicsmagick"
 
@@ -84,7 +110,9 @@ vulcan build -v \
   -n graphicsmagick \
   -o $gm_local_path \
   --deps http://s3.amazonaws.com/$S3_BUCKET/$LIBPNG_REMOTE_PATH \
-  http://s3.amazonaws.com/$S3_BUCKET/$ZLIB_REMOTE_PATH
+  http://s3.amazonaws.com/$S3_BUCKET/$ZLIB_REMOTE_PATH \
+  http://s3.amazonaws.com/$S3_BUCKET/$NASM_REMOTE_PATH \
+  http://s3.amazonaws.com/$S3_BUCKET/$LIBJPEG_TURBO_REMOTE_PATH
 
 echo ">>> Uploading graphics magick artifact"
 echo "    to ${S3_BUCKET}/${REMOTE_PATH}"
