@@ -46,8 +46,6 @@ package_download "${ZLIB_REMOTE_PATH}" "${VENDORED_ZLIB}"
 
 cp -R $VENDORED_ZLIB/* $zlib_lib_path
 
-echo "Installation completed" | indent
-
 echo "Installing libpng $LIBPNG_VERSION" | arrow
 
 # we need this directory, it's our destination
@@ -60,7 +58,29 @@ package_download "${LIBPNG_REMOTE_PATH}" "${VENDORED_LIBPNG}"
 
 cp -R $VENDORED_LIBPNG/* $libpng_lib_path
 
-echo "Installation completed" | indent
+echo "Installing nasm $NASM_VERSION" | arrow
+
+# we need this directory, it's our destination
+nasm_lib_path=$BUILD_DIR/vendor/nasm
+mkdir -p $nasm_lib_path
+
+# vendor directories
+VENDORED_NASM="$(mktmpdir nasm)"
+package_download "${NASM_REMOTE_PATH}" "${VENDORED_NASM}"
+
+cp -R $VENDORED_NASM/* $nasm_lib_path
+
+echo "Installing libjpeg-turbo $LIBJPEG_TURBO_VERSION" | arrow
+
+# we need this directory, it's our destination
+libjpeg_turbo_lib_path=$BUILD_DIR/vendor/libjpeg-turbo
+mkdir -p $libjpeg_turbo_lib_path
+
+# vendor directories
+VENDORED_LIBJPEG_TURBO="$(mktmpdir libjpeg)"
+package_download "${LIBJPEG_TURBO_REMOTE_PATH}" "${VENDORED_LIBJPEG_TURBO}"
+
+cp -R $VENDORED_LIBJPEG_TURBO/* $libjpeg_turbo_lib_path
 
 echo "Installing graphicsmagick $GRAPHICS_MAGICK_VERSION" | arrow
 
@@ -77,9 +97,7 @@ cp $VENDORED_GRAPHICSMAGICK/bin/* "$BUILD_DIR/bin/"
 
 cp -R $VENDORED_GRAPHICSMAGICK/* $gm_lib_path
 
-echo "Installation completed" | indent
-
 echo "Building runtime environment for graphicsmagick" | arrow
 mkdir -p $BUILD_DIR/.profile.d
 echo "export PATH=\"\$HOME/bin:\$PATH\"" > $BUILD_DIR/.profile.d/graphicsmagick.sh
-echo "export LD_LIBRARY_PATH=\"/app/vendor/zlib/lib/:/app/vendor/libpng/lib/:/app/vendor/graphicsmagick/lib/:\$LD_LIBRARY_PATH\"" > $BUILD_DIR/.profile.d/graphicsmagick.sh
+echo "export LD_LIBRARY_PATH=\"/app/vendor/nasm/lib/:/app/vendor/libjpeg-turbo/lib/:/app/vendor/zlib/lib/:/app/vendor/libpng/lib/:/app/vendor/graphicsmagick/lib/:\$LD_LIBRARY_PATH\"" > $BUILD_DIR/.profile.d/graphicsmagick.sh
