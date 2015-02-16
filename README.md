@@ -1,8 +1,7 @@
 heroku-buildpack-graphicsmagick
 ===========================
 
-Use the latest version of GraphicsMagick inside Heroku _Cedar_.
-At the moment it is bundled the version 1.3.18.
+Use the latest version of GraphicsMagick (1.3.18) inside Heroku _cedar_. It does not work with cedar-14.
 
 ## Usage
 
