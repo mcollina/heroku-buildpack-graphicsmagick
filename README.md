@@ -1,11 +1,11 @@
 heroku-buildpack-graphicsmagick
 ===========================
 
-Use the latest version of GraphicsMagick (1.3.18) inside Heroku _cedar_. It does not work with cedar-14.
+Use the latest version of GraphicsMagick (1.3.18) inside Heroku.
 
 ## Usage
 
-This buildpack is built to be used through 
+This buildpack is built to be used through
 [heroku-buildpack-multi](https://github.com/ddollar/heroku-buildpack-multi),
 so in your app you need to:
 ```
@@ -28,11 +28,11 @@ To change this buildpack, fork it on Github.  Push up changes to your fork,
 then create a test app with `--buildpack <your-github-url>` and push to it.
 
 To change the vendored binaries for ImageMagick, use the helper scripts
-in the `support/` subdirectory. 
+in the `support/` subdirectory.
 You'll need an S3-enabled AWS account and a bucket to store your
 binaries in.
 The bucket name and imagemagick version are stored in the configs.sh file,
-so update it there (if you plan to contribute back to this repo, do this 
+so update it there (if you plan to contribute back to this repo, do this
 in a separate commit).
 
 To rebuild the ImageMagick package, you can:

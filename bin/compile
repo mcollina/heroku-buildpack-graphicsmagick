@@ -9,6 +9,11 @@ BUILD_DIR=$1
 CACHE_DIR=$2
 LP_DIR=`cd $(dirname $0); cd ..; pwd`
 
+if [ "$STACK" == "" ]; then
+  echo "STACK environment variable must be set indicating which build to use (i.e. STACK=cedar or STACK=cedar-14)"
+  exit 1
+fi
+
 indent() {
   sed -u 's/^/       /'
 }
@@ -30,7 +35,7 @@ function package_download() {
   location="$2"
 
   mkdir -p $location
-  package="http://s3.amazonaws.com/${S3_BUCKET}/${remote}"
+  package="http://s3.amazonaws.com/${S3_BUCKET}/${STACK}/${remote}"
   curl $package -s -o - | tar xzf - -C $location
 }
 

@@ -121,7 +121,8 @@ s3_curl() {
   # $3 = remote name
   # $4 = local name.
   # $5 = mime type
-  local bucket remote date sig md5 arg inout headers
+  local bucket remote date sig md5 arg inout
+  declare -a headers
   # header handling is kinda fugly, but it works.
   bucket="${2:+/${2}}/" # slashify the bucket
   remote="$(urlenc "${3}")" # if you don't, strange things may happen.
