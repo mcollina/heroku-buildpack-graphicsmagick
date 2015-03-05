@@ -1,5 +1,6 @@
-#! /bin/bash 
+#! /bin/bash
 set -e
+[ "$DEBUG" == "true" ] && set -x
 
 source `dirname $0`/../configs.sh
 
@@ -22,6 +23,11 @@ if [ "$S3_BUCKET" == "" ]; then
   exit 1
 fi
 
+if [ "$STACK" == "" ]; then
+  echo "must set STACK to the heroku stack being compiled for (i.e. STACK=cedar or STACK=cedar-14)"
+  exit 1
+fi
+
 basedir="$( cd -P "$( dirname "$0" )" && pwd )"
 
 # make a temp directory
@@ -35,68 +41,66 @@ echo ">>> Building zlib"
 zlib_local_path=$tempdir/zlib-${ZLIB_VERSION}.tgz
 
 # build and package zlib for heroku
-vulcan build -v \
-  -s $home/vendor/zlib-${ZLIB_VERSION} \
-  -n zlib\
-  -o $zlib_local_path
+cp -R $home/vendor/zlib-${ZLIB_VERSION} $tempdir
+cd $tempdir/zlib-${ZLIB_VERSION}
+./configure --prefix /app/vendor/zlib && make install
 
 echo ">>> Uploading zlib"
 
-$basedir/aws/s3 put $S3_BUCKET $ZLIB_REMOTE_PATH $zlib_local_path
+cd /app/vendor/zlib && tar -czvf $zlib_local_path .
+$basedir/aws/s3 put $S3_BUCKET $STACK/$ZLIB_REMOTE_PATH $zlib_local_path
 
 echo ">>> Building libpng"
 
 libpng_local_path=$tempdir/libpng-${LIBPNG_VERSION}.tgz
 
 # build and package libpng for heroku
-vulcan build -v \
-  -s $home/vendor/libpng-${LIBPNG_VERSION} \
-  -n libpng\
-  -o $libpng_local_path \
-  --deps http://s3.amazonaws.com/$S3_BUCKET/$ZLIB_REMOTE_PATH
+cp -R $home/vendor/libpng-${LIBPNG_VERSION} $tempdir
+cd $tempdir/libpng-${LIBPNG_VERSION}
+./configure --prefix /app/vendor/libpng && make install
 
 echo ">>> Uploading libpng artifact"
 echo "    to ${S3_BUCKET}/${LIBPNG_REMOTE_PATH}"
 echo "    from ${libpng_local_path}"
 
-$basedir/aws/s3 put $S3_BUCKET $LIBPNG_REMOTE_PATH $libpng_local_path
+cd /app/vendor/libpng && tar -czvf $libpng_local_path .
+$basedir/aws/s3 put $S3_BUCKET $STACK/$LIBPNG_REMOTE_PATH $libpng_local_path
 
 echo ">>> Building nasm"
 
 nasm_local_path=$tempdir/nasm-${NASM_VERSION}.tgz
+
 # build and package nasm for heroku
-vulcan build -v \
-  -s $home/vendor/nasm-${NASM_VERSION} \
-  -n nasm\
-  -o $nasm_local_path
+cp -R $home/vendor/nasm-${NASM_VERSION} $tempdir
+cd $tempdir/nasm-${NASM_VERSION}
+./configure --prefix /app/vendor/nasm && make install
 
 echo ">>> Uploading nasm artifact"
 echo "    to ${S3_BUCKET}/${NASM_REMOTE_PATH}"
 echo "    from ${nasm_local_path}"
 
-$basedir/aws/s3 put $S3_BUCKET $NASM_REMOTE_PATH $nasm_local_path
+cd /app/vendor/nasm && tar -czvf $nasm_local_path .
+$basedir/aws/s3 put $S3_BUCKET $STACK/$NASM_REMOTE_PATH $nasm_local_path
 
 echo ">>> Building libjpeg-turbo"
 
 libjpeg_turbo_local_path=$tempdir/libjpeg_turbo-${LIBJPEG_TURBO_VERSION}.tgz
-# build and package libpng for heroku
-vulcan build -v \
-  -s $home/vendor/libjpeg-turbo-${LIBJPEG_TURBO_VERSION} \
-  -n libjpeg_turbo\
-  -o $libjpeg_turbo_local_path \
-  --deps http://s3.amazonaws.com/$S3_BUCKET/$ZLIB_REMOTE_PATH \
-  http://s3.amazonaws.com/$S3_BUCKET/$NASM_REMOTE_PATH \
+
+cp -R $home/vendor/libjpeg-turbo-${LIBJPEG_TURBO_VERSION} $tempdir
+cd $tempdir/libjpeg-turbo-${LIBJPEG_TURBO_VERSION}
+PATH=$PATH:/app/vendor/nasm/bin bash -c './configure --prefix /app/vendor/libjpeg_turbo && make install'
 
 echo ">>> Uploading libjpeg-turbo artifact"
 echo "    to ${S3_BUCKET}/${LIBJPEG_TURBO_REMOTE_PATH}"
 echo "    from ${libjpeg_turbo_local_path}"
 
-$basedir/aws/s3 put $S3_BUCKET $LIBJPEG_TURBO_REMOTE_PATH $libjpeg_turbo_local_path
+cd /app/vendor/libjpeg_turbo && tar -czvf $libjpeg_turbo_local_path .
+$basedir/aws/s3 put $S3_BUCKET $STACK/$LIBJPEG_TURBO_REMOTE_PATH $libjpeg_turbo_local_path
 
 echo ">>> Downloading graphicsmagick"
 
 gm_local_path=$tempdir/graphcismagick-${GRAPHICS_MAGICK_VERSION}.tgz
-gm_sources=$tempdir/graphicsmagick-${LIBPNG_VERSION}.tar.gz
+gm_sources=$tempdir/graphicsmagick-${GRAPHICS_MAGICK_VERSION}.tar.gz
 #curl ftp://ftp.graphicsmagick.org/pub/GraphicsMagick/1.3/GraphicsMagick-${GRAPHICS_MAGICK_VERSION}.tar.gz > $gm_sources
 curl http://78.108.103.11/MIRROR/ftp/GraphicsMagick/1.3/GraphicsMagick-${GRAPHICS_MAGICK_VERSION}.tar.gz > $gm_sources
 
@@ -105,17 +109,12 @@ tar -C $tempdir -x -z -f $gm_sources
 echo ">>> Building graphicsmagick"
 
 # build and package imagemagick for heroku
-vulcan build -v \
-  -s $tempdir/GraphicsMagick-$GRAPHICS_MAGICK_VERSION \
-  -n graphicsmagick \
-  -o $gm_local_path \
-  --deps http://s3.amazonaws.com/$S3_BUCKET/$LIBPNG_REMOTE_PATH \
-  http://s3.amazonaws.com/$S3_BUCKET/$ZLIB_REMOTE_PATH \
-  http://s3.amazonaws.com/$S3_BUCKET/$NASM_REMOTE_PATH \
-  http://s3.amazonaws.com/$S3_BUCKET/$LIBJPEG_TURBO_REMOTE_PATH
+cd $tempdir/GraphicsMagick-${GRAPHICS_MAGICK_VERSION}
+./configure --prefix /app/vendor/graphicsmagick && make install
 
 echo ">>> Uploading graphics magick artifact"
 echo "    to ${S3_BUCKET}/${REMOTE_PATH}"
 echo "    from ${gm_local_path}"
 
-$basedir/aws/s3 put $S3_BUCKET $REMOTE_PATH $gm_local_path
+cd /app/vendor/graphicsmagick && tar -czvf $gm_local_path .
+$basedir/aws/s3 put $S3_BUCKET $STACK/$REMOTE_PATH $gm_local_path
