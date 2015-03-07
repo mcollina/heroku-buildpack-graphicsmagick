@@ -117,36 +117,38 @@ curl_headers() {
 s3_curl() {
   # invoke curl to do all the heavy HTTP lifting
   # $1 = method (one of GET, PUT, or DELETE. HEAD is not handled yet.)
-  # $2 = remote bucket.
-  # $3 = remote name
-  # $4 = local name.
-  # $5 = mime type
+  # $2 = remote bucket
+  # $3 = bucket region
+  # $4 = remote name
+  # $5 = local name
+  # $6 = mime type
   local bucket remote date sig md5 arg inout
   declare -a headers
   # header handling is kinda fugly, but it works.
   bucket="${2:+/${2}}/" # slashify the bucket
-  remote="$(urlenc "${3}")" # if you don't, strange things may happen.
+  region="${3}"
+  remote="$(urlenc "${4}")" # if you don't, strange things may happen.
   stdopts="--connect-timeout 10 --fail --silent"
-	mime="${5}"
+	mime="${6}"
   [[ $CURL_S3_DEBUG == true ]] && stdopts="${stdopts} --show-error --fail"
   case "${1}" in
-   GET) arg="-o" inout="${4:--}" # stdout if no $4
+   GET) arg="-o" inout="${5:--}" # stdout if no $5
 	  headers[${#headers[@]}]="x-amz-acl: public-read"
 	;;
    PUT) [[ ${2} ]] || die "PUT can has bucket?"
-        if [[ ! ${3} ]]; then
+        if [[ ! ${4} ]]; then
 	  arg="-X PUT"
 	  headers[${#headers[@]}]="Content-Length: 0"
-	elif [[ -f ${4} ]]; then
-          md5="$(openssl dgst -md5 -binary "${4}"|openssl base64 -e -a)"
-	  arg="-T" inout="${4}"
+	elif [[ -f ${5} ]]; then
+          md5="$(openssl dgst -md5 -binary "${5}"|openssl base64 -e -a)"
+	  arg="-T" inout="${5}"
 	  headers[${#headers[@]}]="x-amz-acl: public-read"
 	  headers[${#headers[@]}]="Expect: 100-continue"
 		if [ "$mime" != "" ]; then
 		  headers[${#headers[@]}]="Content-Type: $mime"
 		fi
 	else
-	  die "Cannot write non-existing file ${4}"
+	  die "Cannot write non-existing file ${5}"
         fi
 	;;
    DELETE) arg="-X DELETE"
@@ -161,31 +163,33 @@ s3_curl() {
   headers[${#headers[@]}]="Date: ${date}"
   [[ ${md5} ]] && headers[${#headers[@]}]="Content-MD5: ${md5}"
     curl ${arg} "${inout}" ${stdopts} -o - -K <(curl_headers "${headers[@]}") \
-       "http://s3.amazonaws.com${bucket}${remote}"
+       "https://${region}.amazonaws.com${bucket}${remote}"
   return $?
 }
 
 s3_put() {
   # $1 = remote bucket to put it into
-  # $2 = remote name to put
-  # $3 = file to put.  This must be present if $2 is.
-  # $4 = mime type
-  s3_curl PUT "${1}" "${2}" "${3:-${2}}" "${4}"
+  # $2 = bucket region
+  # $3 = remote name to put
+  # $4 = file to put.  This must be present if $2 is.
+  # $5 = mime type
+  s3_curl PUT "${1}" "${2}" "${3}" "${4:-${3}}" "${5}"
   return $?
 }
 
 s3_get() {
   # $1 = bucket to get file from
-  # $2 = remote file to get
-  # $3 = local file to get into. Will be overwritten if it exists.
+  # $2 = bucket region
+  # $3 = remote file to get
+  # $4 = local file to get into. Will be overwritten if it exists.
   #      If this contains a path, that path must exist before calling this.
-  s3_curl GET "${1}" "${2}" "${3:-${2}}"
+  s3_curl GET "${1}" "${2}" "${3}" "${4:-${3}}"
   return $?
 }
 
 s3_test() {
   # same args as s3_get, but uses the HEAD verb instead of the GET verb.
-  s3_curl HEAD "${1}" "${2}" >/dev/null
+  s3_curl HEAD "${1}" "${2}" "${3}" >/dev/null
   return $?
 }
 
@@ -207,8 +211,9 @@ s3_list() {
 
 s3_delete() {
   # $1 = bucket to delete from
-  # $2 = item to delete
-  s3_curl DELETE "${1}" "${2}"
+  # $2 = bucket region
+  # $3 = item to delete
+  s3_curl DELETE "${1}" "${2}" "${3}"
   return $?
 }
 

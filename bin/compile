@@ -35,7 +35,7 @@ function package_download() {
   location="$2"
 
   mkdir -p $location
-  package="https://s3-eu-west-1.amazonaws.com/${S3_BUCKET}/${STACK}/${remote}"
+  package="https://${S3_REGION}.amazonaws.com/${S3_BUCKET}/${STACK}/${remote}"
   curl $package -s -o - | tar xzf - -C $location
 }
 
