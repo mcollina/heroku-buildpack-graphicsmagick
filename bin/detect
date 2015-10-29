@@ -1,4 +1,5 @@
 #! /bin/bash
 
 # this buildpack can always be used
+echo "GraphicsMagick"
 exit 0
