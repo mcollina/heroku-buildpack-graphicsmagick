@@ -1,38 +1,20 @@
 heroku-buildpack-graphicsmagick
 ===========================
 
-Use the latest version of GraphicsMagick (1.3.18) inside Heroku.
+Use the latest version of GraphicsMagick (1.3.23) inside Heroku.
 
 ## Usage
 
-This buildpack is built to be used through
-[heroku-buildpack-multi](https://github.com/ddollar/heroku-buildpack-multi),
-so in your app you need to:
-```
-heroku config:set BUILDPACK_URL=https://github.com/ddollar/heroku-buildpack-multi
-```
+Insert the buildback before the main buildpack for your application:
 
-Then, create a `.buildpacks` file inside your app:
 ```
-https://github.com/mcollina/heroku-buildpack-graphicsmagick
-https://github.com/heroku/heroku-buildpack-nodejs
+heroku buildpacks:add --index 1 mcollina/heroku-buildpack-graphicsmagick
 ```
 
-This example was based on the nodejs buildpack, but it can be used with
-any other.
-If it is not working with yours, please report a bug.
+The next time you push your application it should install graphicsmagick before
+your application buildpack.
 
-## Cedar vs Cedar-14
-
-**You shouldn't need to worry about when using on Heroku.**
-
-There are separate binaries for Heroku's `cedar` and `cedar-14` stacks. When
-deploying to Heroku the buildpack automatically chooses which binary to use
-based on the `STACK` environment variable that Heroku sets during slug
-compilation.
-
-If you are using this buildpack outside of Heroku you will need to make sure to
-set the `STACK` environment variable to get the binaries built for your system.
+For more info see: https://devcenter.heroku.com/articles/using-multiple-buildpacks-for-an-app
 
 ## Hacking
 
@@ -47,14 +29,9 @@ The bucket name and imagemagick version are stored in the configs.sh file,
 so update it there (if you plan to contribute back to this repo, do this
 in a separate commit).
 
-Multiple binaries must be built to support Heroku's multiple stacks. If you are
-building on `cedar-14` then set `STACK=cedar-14` and if you are building for
-`cedar` then set `STACK=cedar` so that the binaries are uploaded to S3
-properly.
-
 To rebuild the ImageMagick package, you can:
 
-    $ export AWS_ID=xxx AWS_SECRET=yyy STACK=<cedar or cedar-14>
+    $ export AWS_ID=xxx AWS_SECRET=yyy
     $ s3 create $S3_BUCKET
     $ support/package_graphicsmagick
 
@@ -64,15 +41,24 @@ push your sample app to Heroku to test.  You should see:
     -----> Downloading graphicsmagick YOUR_IMAGE_MAGICK_VERSION_HERE
 
 There is also a `Vagrantfile` which can be used with
-(Vagrant)[https://www.vagrantup.com/] to build `cedar` and `cedar-14` virtual
-machines using Heroku's own open-source provisioning scripts. This allows you
-to build and test your changes in a local VM with a shared filesystem rather
-than having to push your changes up to Github and building on Heroku.
+[Vagrant](https://www.vagrantup.com/) to build a `cedar-14` virtual machine
+using Heroku's own open-source provisioning scripts. This allows you to build
+and test your changes in a local VM with a shared filesystem rather than having
+to push your changes up to Github and building on Heroku.
 
-To build with VMs install (Vagrant)[https://www.vagrantup.com/] and then run
-`vagrant up`. Once it completes you will have two running VMs named `cedar` and
-`cedar-14`. Vagrant by default will map your project folder to `/vagrant` on
-the VM's filesystem.
+To build with VMs install [Vagrant](https://www.vagrantup.com/) and then run
+`vagrant up`. Once it completes you will have a VM named `cedar-14`. Vagrant by
+default will map your project folder to `/vagrant` on the VM's filesystem.
+
+## Heroku Cedar
+
+Heroku dropped the cedar stack on November 4th, 2015. If you still need to run
+this buildpack on cedar for whatever reason you can do by referencing an older
+version of the buildpack:
+
+```
+heroku buildpacks:add --index 1 mcollina/heroku-buildpack-graphicsmagick#35f87dd
+```
 
 ## Contributing to heroku-buildpack-graphicsmagick
 
