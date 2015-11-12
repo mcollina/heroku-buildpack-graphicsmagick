@@ -8,7 +8,7 @@ Use the latest version of GraphicsMagick (1.3.23) inside Heroku.
 Insert the buildback before the main buildpack for your application:
 
 ```
-heroku buildpacks:add --index 1 mcollina/heroku-buildpack-graphicsmagick
+heroku buildpacks:add --index 1 https://github.com/mcollina/heroku-buildpack-graphicsmagick.git
 ```
 
 The next time you push your application it should install graphicsmagick before
@@ -57,7 +57,7 @@ this buildpack on cedar for whatever reason you can do by referencing an older
 version of the buildpack:
 
 ```
-heroku buildpacks:add --index 1 mcollina/heroku-buildpack-graphicsmagick#35f87dd
+heroku buildpacks:add --index 1 https://github.com/mcollina/heroku-buildpack-graphicsmagick.git#35f87dd
 ```
 
 ## Contributing to heroku-buildpack-graphicsmagick
