@@ -11,5 +11,5 @@ export NASM_REMOTE_PATH="nasm-${NASM_VERSION}.tgz"
 export ZLIB_REMOTE_PATH="zlib-${ZLIB_VERSION}.tgz"
 # heroku dropped support for cedar, but leaving for if/when they introduce a
 # new stack
-export STACK="cedar-14"
-export S3_BUCKET="heroku-buildpack-graphicsmagick"
+export STACK="scalingo"
+export S3_BUCKET="graphicsmagick-buildpack"
