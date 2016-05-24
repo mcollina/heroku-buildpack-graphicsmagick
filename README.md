@@ -1,25 +1,48 @@
-heroku-buildpack-graphicsmagick
-===========================
+graphicsmagick-buildpack
+=========================
 
-Use the latest version of GraphicsMagick (1.3.23) inside Heroku.
+This project is a Scalingo [buildpack](http://doc.scalingo.com/buildpacks) to
+use latest version of [GraphicsMagick](www.graphicsmagick.org) (1.3.23)
+alongside your app.
 
-## Usage
+It doesn't do anything else, you have to use it alongside another buildpack thanks to the [mutli-buildpack](https://github.com/Scalingo/multi-buildpack).
 
-Insert the buildback before the main buildpack for your application:
+Usage
+-----
+
+## Setup the multi-buildpack
+
+To use this buildpack, you should prepare .buildpacks file that contains this buildpack url and your real buildpack url.  
 
 ```
-heroku buildpacks:add --index 1 https://github.com/mcollina/heroku-buildpack-graphicsmagick.git
+$ cat .buildpacks
+https://github.com/Scalingo/graphicsmagick-buildpack.git
+https://github.com/Scalingo/ruby-buildpack.git 
 ```
 
-The next time you push your application it should install graphicsmagick before
-your application buildpack.
+The first buildpack will install GraphicsMagick utilities in `/app/bin`, the
+second will handle the deployment of your ruby application. For any other
+technology, go to
+[http://doc.scalingo.com/buildpacks/](http://doc.scalingo.com/buildpacks/)
 
-For more info see: https://devcenter.heroku.com/articles/using-multiple-buildpacks-for-an-app
+## Setup your application configuration
+    
+```
+$ scalingo env-set BUILDPACK_URL=https://github.com/Scalingo/multi-buildpack.git
+$ git push scalingo master
+...
+```
+
+You can verify the installation of GraphicsMagick with the following command.
+
+```
+$ scalingo run "gm version"
+```
 
 ## Hacking
 
-To change this buildpack, fork it on Github.  Push up changes to your fork,
-then create a test app with `--buildpack <your-github-url>` and push to it.
+To change this buildpack, fork it on Github. Push up changes to your fork,
+then create a test app with `BUILDPACK_URL=<your-github-url>` and push to it.
 
 To change the vendored binaries for ImageMagick, use the helper scripts
 in the `support/` subdirectory.
@@ -36,31 +59,11 @@ To rebuild the ImageMagick package, you can:
     $ support/package_graphicsmagick
 
 Commit and push the changes to your buildpack to your Github fork, then
-push your sample app to Heroku to test.  You should see:
+push your sample app to Scalingo to test.  You should see:
 
     -----> Downloading graphicsmagick YOUR_IMAGE_MAGICK_VERSION_HERE
 
-There is also a `Vagrantfile` which can be used with
-[Vagrant](https://www.vagrantup.com/) to build a `cedar-14` virtual machine
-using Heroku's own open-source provisioning scripts. This allows you to build
-and test your changes in a local VM with a shared filesystem rather than having
-to push your changes up to Github and building on Heroku.
-
-To build with VMs install [Vagrant](https://www.vagrantup.com/) and then run
-`vagrant up`. Once it completes you will have a VM named `cedar-14`. Vagrant by
-default will map your project folder to `/vagrant` on the VM's filesystem.
-
-## Heroku Cedar
-
-Heroku dropped the cedar stack on November 4th, 2015. If you still need to run
-this buildpack on cedar for whatever reason you can do by referencing an older
-version of the buildpack:
-
-```
-heroku buildpacks:add --index 1 https://github.com/mcollina/heroku-buildpack-graphicsmagick.git#35f87dd
-```
-
-## Contributing to heroku-buildpack-graphicsmagick
+## Contributing to graphicsmagick-buildpack
 
 * Check out the latest master to make sure the feature hasn't been
   implemented or the bug hasn't been fixed yet
@@ -76,9 +79,11 @@ This is an **OPEN Open Source Project** -- this means that:
 commit-access to the project to contribute as they see fit. This project is
 more like an open wiki than a standard guarded open source project.
 
-_This project is currently being maintained by Ben Alavi (@benalavi)._
+_This project is currently being maintained by Leo Unbekandt (@Soulou)._
 
 ## LICENSE - "MIT License"
+
+Copyright (c) 2016 Scalingo SAS, https://scalingo.com
 
 Copyright (c) 2013 Matteo Collina, http://matteocollina.com
 
