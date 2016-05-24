@@ -1,6 +1,7 @@
 #! /bin/bash
 
 set -e
+[ "$BUILDPACK_DEBUG" == "true" ] && set -x
 
 source `dirname $0`/../configs.sh
 
