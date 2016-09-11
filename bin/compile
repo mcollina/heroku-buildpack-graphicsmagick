@@ -101,6 +101,7 @@ package_download "${REMOTE_PATH}" "${VENDORED_GRAPHICSMAGICK}"
 mkdir -p "$BUILD_DIR/bin/"
 cp $VENDORED_GRAPHICSMAGICK/bin/* "$BUILD_DIR/bin/"
 
+rm -rf $VENDORED_GRAPHICSMAGICK/share/doc $VENDORED_GRAPHICSMAGICK/share/man
 cp -R $VENDORED_GRAPHICSMAGICK/* $gm_lib_path
 
 echo "Building runtime environment for graphicsmagick" | arrow
