@@ -12,12 +12,12 @@ Usage
 
 ## Setup the multi-buildpack
 
-To use this buildpack, you should prepare .buildpacks file that contains this buildpack url and your real buildpack url.  
+To use this buildpack, you should prepare .buildpacks file that contains this buildpack url and your real buildpack url.
 
 ```
 $ cat .buildpacks
 https://github.com/Scalingo/graphicsmagick-buildpack.git
-https://github.com/Scalingo/ruby-buildpack.git 
+https://github.com/Scalingo/ruby-buildpack.git
 ```
 
 The first buildpack will install GraphicsMagick utilities in `/app/bin`, the
@@ -26,7 +26,7 @@ technology, go to
 [http://doc.scalingo.com/buildpacks/](http://doc.scalingo.com/buildpacks/)
 
 ## Setup your application configuration
-    
+
 ```
 $ scalingo env-set BUILDPACK_URL=https://github.com/Scalingo/multi-buildpack.git
 $ git push scalingo master
@@ -52,10 +52,11 @@ The bucket name and imagemagick version are stored in the configs.sh file,
 so update it there (if you plan to contribute back to this repo, do this
 in a separate commit).
 
-To rebuild the ImageMagick package, you can:
+To rebuild the GraphicsMagick package for stack 'scalingo-18', you can:
 
-    $ export AWS_ID=xxx AWS_SECRET=yyy
-    $ s3 create $S3_BUCKET
+    $ docker run -v $buildpack_path:/buildpack -it scalingo/builder-18:v1 bash
+    $ cd /buildpack
+    $ export AWS_ID=xxx AWS_SECRET=yyy STACK=scalingo-18
     $ support/package_graphicsmagick
 
 Commit and push the changes to your buildpack to your Github fork, then
