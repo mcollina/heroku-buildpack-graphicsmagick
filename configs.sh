@@ -1,5 +1,5 @@
 
-export ZLIB_VERSION="1.2.8"
+export ZLIB_VERSION="1.2.9"
 export LIBPNG_VERSION="1.5.17"
 export NASM_VERSION="2.14.02"
 export LIBJPEG_TURBO_VERSION="1.3.0"
