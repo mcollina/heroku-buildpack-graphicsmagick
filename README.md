@@ -2,7 +2,7 @@ graphicsmagick-buildpack
 =========================
 
 This project is a Scalingo [buildpack](http://doc.scalingo.com/buildpacks) to
-use latest version of [GraphicsMagick](www.graphicsmagick.org) (1.3.23)
+use latest version of [GraphicsMagick](www.graphicsmagick.org) (1.3.36)
 alongside your app.
 
 It doesn't do anything else, you have to use it alongside another buildpack thanks to the [mutli-buildpack](https://github.com/Scalingo/multi-buildpack).
