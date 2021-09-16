@@ -25,13 +25,12 @@ function mktmpdir() {
   echo $dir
 }
 
-function package_download() {
-  local remote location
-  remote="$1"
-  location="$2"
+function archive_download() {
+  local location
+  location="$1"
 
   mkdir -p $location
-  package="https://${S3_BUCKET}.s3.eu-central-1.amazonaws.com/${remote}"
+  package="$ARCHIVE_URL"
   curl $package -s -o - | tar xzf - -C $location --strip-components 1
 }
 
@@ -43,7 +42,7 @@ mkdir -p $gm_lib_path
 
 # vendor directories
 VENDORED_GRAPHICSMAGICK="$(mktmpdir graphicsmagick)"
-package_download "${REMOTE_PATH}" "${VENDORED_GRAPHICSMAGICK}"
+archive_download "${VENDORED_GRAPHICSMAGICK}"
 
 pushd $VENDORED_GRAPHICSMAGICK
 ./configure

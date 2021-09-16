@@ -41,6 +41,23 @@ $ scalingo run "gm version"
 
 ## Hacking
 
+### New way
+
+You could upload the desired version of GraphicMagick from [GraphicMagick sources](https://hg.osdn.net/view/graphicsmagick/GM/tags)
+on a S3 for example. Then using the environment variable `ARCHIVE_URL` to specify
+the archive location, following the example:
+
+```shell
+scalingo env-set ARCHIVE_URL=https://hg.osdn.net/view/graphicsmagick/GM/archive/GraphicsMagick-1_3_36.tar.gz
+```
+
+> Note that Scalingo provide only support of the default version defined in `configs.sh` file.
+We do not guarantee the proper functioning of the build in case of usage of other versions.
+
+### Old way
+
+> Scripts use bellow are not maintained but you can be inspired by it.
+
 To change this buildpack, fork it on Github. Push up changes to your fork,
 then create a test app with `BUILDPACK_URL=<your-github-url>` and push to it.
 

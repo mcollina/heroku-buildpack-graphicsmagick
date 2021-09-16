@@ -1,4 +1,5 @@
-export GRAPHICS_MAGICK_VERSION="1.3.36"
-export REMOTE_PATH="graphicsmagick-${GRAPHICS_MAGICK_VERSION}.tar.gz"
+export GRAPHICS_MAGICK_VERSION="${GRAPHICS_MAGICK_VERSION:-1.3.36}"
+export REMOTE_PATH="${REMOTE_PATH:-graphicsmagick-${GRAPHICS_MAGICK_VERSION}.tar.gz}"
 export STACK="${STACK:-scalingo-18}"
-export S3_BUCKET="buildpacks-repository"
+export S3_BUCKET="${S3_BUCKET:-buildpacks-repository}"
+export ARCHIVE_URL="${ARCHIVE_URL:-https://${S3_BUCKET}.s3.eu-central-1.amazonaws.com/${REMOTE_PATH}}"
