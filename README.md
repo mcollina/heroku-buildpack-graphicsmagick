@@ -44,11 +44,11 @@ $ scalingo run "gm version"
 ### New way
 
 You could upload the desired version of GraphicMagick from [GraphicMagick sources](https://hg.osdn.net/view/graphicsmagick/GM/tags)
-on a S3 for example. Then using the environment variable `ARCHIVE_URL` to specify
+on a S3 for example. Then using the environment variable `GRAPHICS_MAGICK_ARCHIVE_URL` to specify
 the archive location, following the example:
 
 ```shell
-scalingo env-set ARCHIVE_URL=https://hg.osdn.net/view/graphicsmagick/GM/archive/GraphicsMagick-1_3_36.tar.gz
+scalingo env-set GRAPHICS_MAGICK_ARCHIVE_URL=https://hg.osdn.net/view/graphicsmagick/GM/archive/GraphicsMagick-1_3_36.tar.gz
 ```
 
 > Note that Scalingo provide only support of the default version defined in `configs.sh` file.
