@@ -56,7 +56,7 @@ We do not guarantee the proper functioning of the build in case of usage of othe
 
 ### Old way
 
-> Scripts use bellow are not maintained but you can be inspired by it.
+> Scripts use below are not maintained but you can be inspired by it.
 
 To change this buildpack, fork it on Github. Push up changes to your fork,
 then create a test app with `BUILDPACK_URL=<your-github-url>` and push to it.
