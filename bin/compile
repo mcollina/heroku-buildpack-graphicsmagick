@@ -32,7 +32,7 @@ function archive_download() {
   location="$1"
 
   mkdir -p $location
-  package="$GM_ARCHIVE_URL"
+  package="$GRAPHICS_MAGICK_ARCHIVE_URL"
   curl $package -s -o - | tar xzf - -C $location --strip-components 1
 }
 
