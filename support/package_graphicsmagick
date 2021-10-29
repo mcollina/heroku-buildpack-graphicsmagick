@@ -48,23 +48,8 @@ major=${arr[0]}
 minor=${arr[1]}
 patch=${arr[2]}
 
-# if [ "$AWS_ID" == "" ]; then
-#   echo "must set AWS_ID"
-#   exit 1
-# fi
-
-# if [ "$AWS_SECRET" == "" ]; then
-#   echo "must set AWS_SECRET"
-#   exit 1
-# fi
-
-# if [ "$S3_BUCKET" == "" ]; then
-#   echo "must set S3_BUCKET"
-#   exit 1
-# fi
-
 if [ "$STACK" == "" ]; then
-  echo "must set STACK to the scalingo stack being compiled for (i.e. STACK=scalingo-18)"
+  echo "must set STACK to the scalingo stack being compiled for (i.e. STACK=scalingo-20)"
   exit 1
 fi
 
@@ -94,10 +79,6 @@ make
 make DESTDIR=$gm_lib_path install
 popd
 
-# echo ">>> Uploading graphics magick"
-# echo "    to ${S3_BUCKET}/${REMOTE_PATH}"
-# echo "    from $gm_local_path"
 
 tar -czf $gm_local_path -C $vendored_graphicsmagick_dir .
 echo -e "You can upload archive: $gm_local_path to S3 now: \n\t$gm_local_path"
-# ${basedir}/aws/s3 put $S3_BUCKET ${STACK}/${REMOTE_PATH} $gm_local_path
