@@ -25,15 +25,13 @@ arrow() {
 }
 
 function mktmpdir() {
-  dir=$(mktemp -t graphicsmagick-$1-XXXX)
+  local dir=$1
   rm -rf $dir
   mkdir -p $dir
-  echo $dir
 }
 
 function archive_download() {
-  local location
-  location="$1"
+  local location="$1"
 
   mkdir -p $location
   package="$GRAPHICS_MAGICK_ARCHIVE_URL"
@@ -46,13 +44,21 @@ echo "Installing graphicsmagick $GRAPHICS_MAGICK_VERSION" | arrow
 gm_lib_path=$BUILD_DIR/vendor/graphicsmagick
 mkdir -p $gm_lib_path
 
-# vendor directories
-graphicsmagick_tmp_dir="$(mktmpdir graphicsmagick)"
-archive_download "$graphicsmagick_tmp_dir"
+graphicsmagick_cache_dir="${CACHE_DIR}/graphicsmagick-archive"
+
+# Test if cache directory exists
+if [ ! -d "$graphicsmagick_cache_dir" ]; then
+  # vendor directories
+  mktmpdir $graphicsmagick_cache_dir
+  echo "Downloading archive in $graphicsmagick_cache_dir" | arrow
+  archive_download "$graphicsmagick_cache_dir"
+else
+  echo "Using cache directory: $graphicsmagick_cache_dir" | arrow
+fi
 
 # If the archive does not contain the binary, we build it
-if [[ ! -f "${graphicsmagick_tmp_dir}/utilities/gm" ]]; then
-  pushd $graphicsmagick_tmp_dir
+if [[ ! -f "${graphicsmagick_cache_dir}/utilities/gm" ]]; then
+  pushd $graphicsmagick_cache_dir
   ./configure
   make
   make DESTDIR=$gm_lib_path install
@@ -60,10 +66,10 @@ if [[ ! -f "${graphicsmagick_tmp_dir}/utilities/gm" ]]; then
 fi
 
 mkdir -p "$BUILD_DIR/bin/"
-cp ${graphicsmagick_tmp_dir}/utilities/gm "${BUILD_DIR}/bin/"
+cp ${graphicsmagick_cache_dir}/utilities/gm "${BUILD_DIR}/bin/"
 
 rm -rf $VENDORED_GRAPHICSMAGICK/doc
-cp -R ${graphicsmagick_tmp_dir}/* $gm_lib_path
+cp -Rf ${graphicsmagick_cache_dir}/* $gm_lib_path
 
 echo "Building runtime environment for graphicsmagick" | arrow
 mkdir -p ${BUILD_DIR}/.profile.d
