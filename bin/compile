@@ -2,15 +2,19 @@
 
 set -e
 if [ -n "$BUILDPACK_DEBUG" ]; then
-    set -x
+  set -x
 fi
 
-source `dirname $0`/../configs.sh
+source $(dirname $0)/../configs.sh
 
 # parse and derive params
 BUILD_DIR=$1
 CACHE_DIR=$2
-LP_DIR=`cd $(dirname $0); cd ..; pwd`
+LP_DIR=$(
+  cd $(dirname $0)
+  cd ..
+  pwd
+)
 
 indent() {
   sed -u 's/^/       /'
@@ -43,24 +47,28 @@ gm_lib_path=$BUILD_DIR/vendor/graphicsmagick
 mkdir -p $gm_lib_path
 
 # vendor directories
-VENDORED_GRAPHICSMAGICK="$(mktmpdir graphicsmagick)"
-archive_download "${VENDORED_GRAPHICSMAGICK}"
+graphicsmagick_tmp_dir="$(mktmpdir graphicsmagick)"
+archive_download "$graphicsmagick_tmp_dir"
 
-pushd $VENDORED_GRAPHICSMAGICK
-./configure
-make
-make DESTDIR=$gm_lib_path install
-popd
+# If the archive does not contain the binary, we build it
+if [[ ! -f "${graphicsmagick_tmp_dir}/utilities/gm" ]]; then
+  pushd $graphicsmagick_tmp_dir
+  ./configure
+  make
+  make DESTDIR=$gm_lib_path install
+  popd
+fi
 
 mkdir -p "$BUILD_DIR/bin/"
-cp $VENDORED_GRAPHICSMAGICK/utilities/gm "$BUILD_DIR/bin/"
+cp ${graphicsmagick_tmp_dir}/utilities/gm "${BUILD_DIR}/bin/"
 
-cp -R $VENDORED_GRAPHICSMAGICK/* $gm_lib_path
+rm -rf $VENDORED_GRAPHICSMAGICK/doc
+cp -R ${graphicsmagick_tmp_dir}/* $gm_lib_path
 
 echo "Building runtime environment for graphicsmagick" | arrow
-mkdir -p $BUILD_DIR/.profile.d
-echo "export PATH=\"\$HOME/bin:\$PATH\"" > $BUILD_DIR/.profile.d/graphicsmagick.sh
+mkdir -p ${BUILD_DIR}/.profile.d
+echo "export PATH=\"\$HOME/bin:\$PATH\"" >${BUILD_DIR}/.profile.d/graphicsmagick.sh
 
-cat <<EOF > export
+cat <<EOF >export
 export PATH=$BUILD_DIR/bin:$PATH
 EOF
