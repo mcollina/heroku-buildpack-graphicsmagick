@@ -68,7 +68,6 @@ tar -C $vendored_graphicsmagick_dir -x -z -f $gm_sources --strip-components 1
 
 echo ">>> Building graphicsmagick"
 
-# we need this directory, it's our destination
 gm_local_path=/tmp/graphicsmagick-${GRAPHICS_MAGICK_VERSION}.tar.gz
 gm_lib_path=${BUILD_DIR}/vendor/graphicsmagick
 mkdir -p $gm_lib_path
@@ -78,7 +77,6 @@ pushd $vendored_graphicsmagick_dir
 make
 make DESTDIR=$gm_lib_path install
 popd
-
 
 tar -czf $gm_local_path -C $vendored_graphicsmagick_dir .
 echo -e "You can upload archive: $gm_local_path to S3 now: \n\t$gm_local_path"

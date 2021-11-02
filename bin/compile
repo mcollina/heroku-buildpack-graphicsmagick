@@ -48,12 +48,14 @@ graphicsmagick_cache_dir="${CACHE_DIR}/graphicsmagick-archive"
 
 # Test if cache directory exists
 if [ ! -d "$graphicsmagick_cache_dir" ]; then
-  # vendor directories
+  # create vendor directories
   mktmpdir $graphicsmagick_cache_dir
+fi
+
+# Test if the archive is present in the cache directory then download it if not.
+if [ ! -d "${graphicsmagick_cache_dir}/utilities" ]; then
   echo "Downloading archive in $graphicsmagick_cache_dir" | arrow
   archive_download "$graphicsmagick_cache_dir"
-else
-  echo "Using cache directory: $graphicsmagick_cache_dir" | arrow
 fi
 
 # If the archive does not contain the binary, we build it
@@ -68,7 +70,11 @@ fi
 mkdir -p "$BUILD_DIR/bin/"
 cp ${graphicsmagick_cache_dir}/utilities/gm "${BUILD_DIR}/bin/"
 
-rm -rf $VENDORED_GRAPHICSMAGICK/doc
+# If doc folder still exitst, we can delete it safely
+if [ -d "${graphicsmagick_cache_dir}/doc" ]; then
+  rm -rf ${graphicsmagick_tmp_dir}/doc
+fi
+
 cp -Rf ${graphicsmagick_cache_dir}/* $gm_lib_path
 
 echo "Building runtime environment for graphicsmagick" | arrow
