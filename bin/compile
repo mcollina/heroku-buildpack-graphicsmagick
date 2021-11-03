@@ -44,7 +44,7 @@ echo "Installing graphicsmagick $GRAPHICS_MAGICK_VERSION" | arrow
 gm_lib_path=$BUILD_DIR/vendor/graphicsmagick
 mkdir -p $gm_lib_path
 
-graphicsmagick_cache_dir="${CACHE_DIR}/graphicsmagick-archive"
+graphicsmagick_cache_dir="${CACHE_DIR}/graphicsmagick-${GRAPHICS_MAGICK_VERSION}-archive"
 
 # Test if cache directory exists
 if [ ! -d "$graphicsmagick_cache_dir" ]; then
@@ -72,7 +72,7 @@ cp ${graphicsmagick_cache_dir}/utilities/gm "${BUILD_DIR}/bin/"
 
 # If doc folder still exitst, we can delete it safely
 if [ -d "${graphicsmagick_cache_dir}/doc" ]; then
-  rm -rf ${graphicsmagick_tmp_dir}/doc
+  rm -r ${graphicsmagick_tmp_dir}/doc
 fi
 
 cp -Rf ${graphicsmagick_cache_dir}/* $gm_lib_path
