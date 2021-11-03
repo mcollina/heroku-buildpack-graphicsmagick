@@ -12,7 +12,7 @@ Usage
 
 ## Setup the multi-buildpack
 
-To use this buildpack, you should prepare .buildpacks file that contains this buildpack url and your real buildpack url.
+To use this buildpack, you should prepare `.buildpacks` file that contains this buildpack url and your real buildpack url.
 
 ```
 $ cat .buildpacks
@@ -41,8 +41,6 @@ $ scalingo run "gm version"
 
 ## Hacking
 
-### New way
-
 You could upload the desired version of GraphicMagick from [GraphicMagick sources](https://hg.osdn.net/view/graphicsmagick/GM/tags)
 on a S3 for example. Then using the environment variable `GRAPHICS_MAGICK_ARCHIVE_URL` to specify
 the archive location, following the example:
@@ -54,26 +52,24 @@ scalingo env-set GRAPHICS_MAGICK_ARCHIVE_URL=https://hg.osdn.net/view/graphicsma
 > Note that Scalingo provide only support of the default version defined in `configs.sh` file.
 We do not guarantee the proper functioning of the build in case of usage of other versions.
 
-### Old way
-
-> Scripts use below are not maintained but you can be inspired by it.
+### Alternative way
 
 To change this buildpack, fork it on Github. Push up changes to your fork,
 then create a test app with `BUILDPACK_URL=<your-github-url>` and push to it.
 
 To change the vendored binaries for ImageMagick, use the helper scripts
 in the `support/` subdirectory.
-You'll need an S3-enabled AWS account and a bucket to store your
-binaries in.
+You'll need an S3 account and a bucket to store your binaries in.
 The bucket name and imagemagick version are stored in the configs.sh file,
 so update it there (if you plan to contribute back to this repo, do this
 in a separate commit).
 
-To rebuild the GraphicsMagick package for stack 'scalingo-18', you can:
+To rebuild the GraphicsMagick package for stack 'scalingo-20', you can:
 
-    $ docker run -v $buildpack_path:/buildpack -it scalingo/builder-18:v1 bash
+    $ docker run --rm -v $buildpack_path:/buildpack -it scalingo/scalingo-20:v1 bash
+    $ apt-get install s3cmd
     $ cd /buildpack
-    $ export AWS_ID=xxx AWS_SECRET=yyy STACK=scalingo-18
+    $ export S3_ACCESS_KEY=xxx S3_SECRET_KEY=yyy STACK=scalingo-20
     $ support/package_graphicsmagick
 
 Commit and push the changes to your buildpack to your Github fork, then

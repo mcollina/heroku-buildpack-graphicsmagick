@@ -60,6 +60,7 @@ fi
 
 # If the archive does not contain the binary, we build it
 if [[ ! -f "${graphicsmagick_cache_dir}/utilities/gm" ]]; then
+  echo "Building graphicsmagick in $graphicsmagick_cache_dir" | arrow
   pushd $graphicsmagick_cache_dir
   ./configure
   make
@@ -75,7 +76,7 @@ if [ -d "${graphicsmagick_cache_dir}/doc" ]; then
   rm -r ${graphicsmagick_tmp_dir}/doc
 fi
 
-cp -Rf ${graphicsmagick_cache_dir}/* $gm_lib_path
+cp -R ${graphicsmagick_cache_dir}/* $gm_lib_path
 
 echo "Building runtime environment for graphicsmagick" | arrow
 mkdir -p ${BUILD_DIR}/.profile.d

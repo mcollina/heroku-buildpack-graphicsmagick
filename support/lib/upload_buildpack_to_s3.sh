@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 #
-# This script uploads an archive to S3.
+# This script uploads an archive to S3. It uses s3cmd, you can install it by
+# using apt-get install `s3cmd`.
 #
 # You should define two environment variable for the S3 upload to work:
 #   - S3_ACCESS_KEY
@@ -25,7 +26,7 @@ print_usage() {
   echo "You have to set S3_ACCESS_KEY and S3_SECRET_KEY variables, then:"
   echo "$0 <path_in_bucket> <file to upload>"
   echo
-  echo "Example: S3_ACCESS_KEY=<s3_access_key> S3_SECRET_KEY=<s3_secret_key> $0 graphicsmagick/scalingo-20 ./graphicsmagick-1.36.0.tar.gz"
+  echo "Example: S3_ACCESS_KEY=<s3_access_key> S3_SECRET_KEY=<s3_secret_key> $0 graphicsmagick/scalingo-20/graphicsmagick-1.36.0.tar.gz ./graphicsmagick-1.36.0.tar.gz"
 }
 
 s3_path="$1"
@@ -64,8 +65,8 @@ s3cmd_cmd="s3cmd"
 echo "---> Uploading $archive_name to S3 (${S3_BUCKET}/${s3_path})"
 echo ""
 
-${s3cmd_cmd} --region $S3_REGION --access_key $S3_ACCESS_KEY --secret_key $S3_SECRET_KEY \
-  --quiet --acl-public put ${archive_name} "s3://${S3_BUCKET}/${s3_path}"
+$s3cmd_cmd --region $S3_REGION --access_key $S3_ACCESS_KEY --secret_key $S3_SECRET_KEY \
+  --quiet --acl-public put $archive_name "s3://${S3_BUCKET}/${s3_path}"
 if [[ $? -ne 0 ]]; then
   echo "Error uploading the archive to S3" >&2
   exit -1
