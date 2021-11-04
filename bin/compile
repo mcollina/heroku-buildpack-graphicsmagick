@@ -2,15 +2,19 @@
 
 set -e
 if [ -n "$BUILDPACK_DEBUG" ]; then
-    set -x
+  set -x
 fi
 
-source `dirname $0`/../configs.sh
+source $(dirname $0)/../configs.sh
 
 # parse and derive params
 BUILD_DIR=$1
 CACHE_DIR=$2
-LP_DIR=`cd $(dirname $0); cd ..; pwd`
+LP_DIR=$(
+  cd $(dirname $0)
+  cd ..
+  pwd
+)
 
 indent() {
   sed -u 's/^/       /'
@@ -21,15 +25,13 @@ arrow() {
 }
 
 function mktmpdir() {
-  dir=$(mktemp -t graphicsmagick-$1-XXXX)
+  local dir=$1
   rm -rf $dir
   mkdir -p $dir
-  echo $dir
 }
 
 function archive_download() {
-  local location
-  location="$1"
+  local location="$1"
 
   mkdir -p $location
   package="$GRAPHICS_MAGICK_ARCHIVE_URL"
@@ -42,25 +44,44 @@ echo "Installing graphicsmagick $GRAPHICS_MAGICK_VERSION" | arrow
 gm_lib_path=$BUILD_DIR/vendor/graphicsmagick
 mkdir -p $gm_lib_path
 
-# vendor directories
-VENDORED_GRAPHICSMAGICK="$(mktmpdir graphicsmagick)"
-archive_download "${VENDORED_GRAPHICSMAGICK}"
+graphicsmagick_cache_dir="${CACHE_DIR}/graphicsmagick-${GRAPHICS_MAGICK_VERSION}-archive"
 
-pushd $VENDORED_GRAPHICSMAGICK
-./configure
-make
-make DESTDIR=$gm_lib_path install
-popd
+# Test if cache directory exists
+if [ ! -d "$graphicsmagick_cache_dir" ]; then
+  # create vendor directories
+  mktmpdir $graphicsmagick_cache_dir
+fi
+
+# Test if the archive is present in the cache directory then download it if not.
+if [ ! -d "${graphicsmagick_cache_dir}/utilities" ]; then
+  echo "Downloading archive in $graphicsmagick_cache_dir" | arrow
+  archive_download "$graphicsmagick_cache_dir"
+fi
+
+# If the archive does not contain the binary, we build it
+if [[ ! -f "${graphicsmagick_cache_dir}/utilities/gm" ]]; then
+  echo "Building graphicsmagick in $graphicsmagick_cache_dir" | arrow
+  pushd $graphicsmagick_cache_dir
+  ./configure
+  make
+  make DESTDIR=$gm_lib_path install
+  popd
+fi
 
 mkdir -p "$BUILD_DIR/bin/"
-cp $VENDORED_GRAPHICSMAGICK/utilities/gm "$BUILD_DIR/bin/"
+cp ${graphicsmagick_cache_dir}/utilities/gm "${BUILD_DIR}/bin/"
 
-cp -R $VENDORED_GRAPHICSMAGICK/* $gm_lib_path
+# If doc folder still exitst, we can delete it safely
+if [ -d "${graphicsmagick_cache_dir}/doc" ]; then
+  rm -r ${graphicsmagick_tmp_dir}/doc
+fi
+
+cp -R ${graphicsmagick_cache_dir}/* $gm_lib_path
 
 echo "Building runtime environment for graphicsmagick" | arrow
-mkdir -p $BUILD_DIR/.profile.d
-echo "export PATH=\"\$HOME/bin:\$PATH\"" > $BUILD_DIR/.profile.d/graphicsmagick.sh
+mkdir -p ${BUILD_DIR}/.profile.d
+echo "export PATH=\"\$HOME/bin:\$PATH\"" >${BUILD_DIR}/.profile.d/graphicsmagick.sh
 
-cat <<EOF > export
+cat <<EOF >export
 export PATH=$BUILD_DIR/bin:$PATH
 EOF

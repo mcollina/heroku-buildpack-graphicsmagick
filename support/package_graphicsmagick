@@ -1,120 +1,71 @@
 #! /bin/bash
 set -e
-[ "$DEBUG" == "true" ] && set -x
+if [ -n "$BUILDPACK_DEBUG" ]; then
+  set -x
+fi
 
-source `dirname $0`/../configs.sh
+function mktmpdir() {
+  dir=$(mktemp -t graphicsmagick-$1-XXXX)
+  rm -rf $dir
+  mkdir -p $dir
+  echo $dir
+}
 
-pushd `dirname $0`/.. >> /dev/null
-home=`pwd`
-popd >> /dev/null
+function archive_download() {
+  local url="$1"
+  local location="$2"
 
-if [ "$AWS_ID" == "" ]; then
-  echo "must set AWS_ID"
+  mkdir -p $location
+  curl -L $url -s -o - | tar xzf - -C $location --strip-components 1
+}
+
+source $(dirname $0)/../configs.sh
+
+if [ "$S3_ACCESS_KEY" == "" ]; then
+  echo "must set S3_ACCESS_KEY"
   exit 1
 fi
 
-if [ "$AWS_SECRET" == "" ]; then
-  echo "must set AWS_SECRET"
-  exit 1
-fi
-
-if [ "$S3_BUCKET" == "" ]; then
-  echo "must set S3_BUCKET"
+if [ "$S3_SECRET_KEY" == "" ]; then
+  echo "must set S3_SECRET_KEY"
   exit 1
 fi
 
 if [ "$STACK" == "" ]; then
-  echo "must set STACK to the heroku stack being compiled for (i.e. STACK=cedar or STACK=cedar-14)"
+  echo "must set STACK to the scalingo stack being compiled for (i.e. STACK=scalingo-20)"
   exit 1
 fi
 
-basedir="$( cd -P "$( dirname "$0" )" && pwd )"
+pushd $(dirname $0)/.. >>/dev/null
+home=$(pwd)
+popd >>/dev/null
 
-# make a temp directory
-tempdir="$( mktemp -t graphicsmagick_XXXX )"
-rm -rf $tempdir
-mkdir -p $tempdir
-cd $tempdir
+VENDOR_GRAPHICS_MAGICK_ARCHIVE_URL="${VENDOR_GRAPHICS_MAGICK_ARCHIVE_URL:-"https://sourceforge.net/projects/graphicsmagick/files/graphicsmagick/${GRAPHICS_MAGICK_VERSION}/GraphicsMagick-${GRAPHICS_MAGICK_VERSION}.tar.gz/download"}"
 
-echo ">>> Building zlib"
-
-zlib_local_path=$tempdir/zlib-${ZLIB_VERSION}.tgz
-
-# build and package zlib for heroku
-cp -R $home/vendor/zlib-${ZLIB_VERSION} $tempdir
-cd $tempdir/zlib-${ZLIB_VERSION}
-./configure --prefix /app/vendor/zlib && make install
-
-echo ">>> Uploading zlib"
-
-cd /app/vendor/zlib && tar -czvf $zlib_local_path .
-$basedir/aws/s3 put $S3_BUCKET $STACK/$ZLIB_REMOTE_PATH $zlib_local_path
-
-echo ">>> Building libpng"
-
-libpng_local_path=$tempdir/libpng-${LIBPNG_VERSION}.tgz
-
-# build and package libpng for heroku
-cp -R $home/vendor/libpng-${LIBPNG_VERSION} $tempdir
-cd $tempdir/libpng-${LIBPNG_VERSION}
-./configure --prefix /app/vendor/libpng && make install
-
-echo ">>> Uploading libpng artifact"
-echo "    to ${S3_BUCKET}/${LIBPNG_REMOTE_PATH}"
-echo "    from ${libpng_local_path}"
-
-cd /app/vendor/libpng && tar -czvf $libpng_local_path .
-$basedir/aws/s3 put $S3_BUCKET $STACK/$LIBPNG_REMOTE_PATH $libpng_local_path
-
-echo ">>> Building nasm"
-
-nasm_local_path=$tempdir/nasm-${NASM_VERSION}.tgz
-
-# build and package nasm for heroku
-cp -R $home/vendor/nasm-${NASM_VERSION} $tempdir
-cd $tempdir/nasm-${NASM_VERSION}
-./configure --prefix /app/vendor/nasm && make install
-
-echo ">>> Uploading nasm artifact"
-echo "    to ${S3_BUCKET}/${NASM_REMOTE_PATH}"
-echo "    from ${nasm_local_path}"
-
-cd /app/vendor/nasm && tar -czvf $nasm_local_path .
-$basedir/aws/s3 put $S3_BUCKET $STACK/$NASM_REMOTE_PATH $nasm_local_path
-
-echo ">>> Building libjpeg-turbo"
-
-libjpeg_turbo_local_path=$tempdir/libjpeg_turbo-${LIBJPEG_TURBO_VERSION}.tgz
-
-cp -R $home/vendor/libjpeg-turbo-${LIBJPEG_TURBO_VERSION} $tempdir
-cd $tempdir/libjpeg-turbo-${LIBJPEG_TURBO_VERSION}
-PATH=$PATH:/app/vendor/nasm/bin bash -c './configure --prefix /app/vendor/libjpeg_turbo && make install'
-
-echo ">>> Uploading libjpeg-turbo artifact"
-echo "    to ${S3_BUCKET}/${LIBJPEG_TURBO_REMOTE_PATH}"
-echo "    from ${libjpeg_turbo_local_path}"
-
-cd /app/vendor/libjpeg_turbo && tar -czvf $libjpeg_turbo_local_path .
-$basedir/aws/s3 put $S3_BUCKET $STACK/$LIBJPEG_TURBO_REMOTE_PATH $libjpeg_turbo_local_path
+basedir="$(cd -P "$(dirname "$0")" && pwd)"
 
 echo ">>> Downloading graphicsmagick"
 
-gm_local_path=$tempdir/graphcismagick-${GRAPHICS_MAGICK_VERSION}.tgz
-gm_sources=$tempdir/graphicsmagick-${GRAPHICS_MAGICK_VERSION}.tar.gz
-#curl ftp://ftp.graphicsmagick.org/pub/GraphicsMagick/1.3/GraphicsMagick-${GRAPHICS_MAGICK_VERSION}.tar.gz > $gm_sources
-curl http://78.108.103.11/MIRROR/ftp/GraphicsMagick/1.3/GraphicsMagick-${GRAPHICS_MAGICK_VERSION}.tar.gz > $gm_sources
-
-tar -C $tempdir -x -z -f $gm_sources
+# vendor directories
+vendored_graphicsmagick_dir="$(mktmpdir graphicsmagick)"
+archive_download "$VENDOR_GRAPHICS_MAGICK_ARCHIVE_URL" "$vendored_graphicsmagick_dir"
 
 echo ">>> Building graphicsmagick"
 
-# build and package imagemagick for heroku
-cd $tempdir/GraphicsMagick-${GRAPHICS_MAGICK_VERSION}
-./configure --prefix /app/vendor/graphicsmagick && make install
+gm_local_path=/tmp/graphicsmagick-${GRAPHICS_MAGICK_VERSION}.tar.gz
+gm_lib_path=${BUILD_DIR}/vendor/graphicsmagick
+mkdir -p $gm_lib_path
 
-echo ">>> Uploading graphics magick artifact"
-echo "    to ${S3_BUCKET}/${REMOTE_PATH}"
-echo "    from ${gm_local_path}"
+pushd $vendored_graphicsmagick_dir
+./configure
+make
+make DESTDIR=$gm_lib_path install
+popd
 
-cd /app/vendor/graphicsmagick && tar -czvf $gm_local_path .
-$basedir/aws/s3 put $S3_BUCKET $STACK/$REMOTE_PATH $gm_local_path
+echo ">>> Creating graphicsmagick archive"
+
+tar -czf $gm_local_path -C $vendored_graphicsmagick_dir .
+
+echo ">>> Uploading graphicsmagick"
+echo "    from $gm_local_path file"
+${basedir}/lib/upload_buildpack_to_s3.sh "${REMOTE_PATH}" "${gm_local_path}"
